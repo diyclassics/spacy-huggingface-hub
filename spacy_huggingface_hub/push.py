@@ -99,7 +99,9 @@ def push(
         # Some whl files might not have the version in the name (such as the ones at HF)
         # but the version can be found in the meta.json file.
         if version == "any":
-            version = json.load(open(Path(tmpdirname) / repo_name / "meta.json"))["version"]
+            version = json.load(open(Path(tmpdirname) / repo_name / "meta.json"))[
+                "version"
+            ]
 
         # Move files up one directory
         # The original structure is ca_core/ca_core-version/files. files are moved one level
@@ -122,8 +124,9 @@ def push(
         if verbose:
             print(metadata)
 
+        # TODO: Fix; fails with pip>24.0
         # Remove version from whl filename
-        dst_file = repo_local_path / f"{repo_name}-any-py3-none-any.whl"
+        dst_file = repo_local_path / f"{repo_name}-{version}-py3-none-any.whl"
         shutil.copyfile(str(whl_path), str(dst_file))
 
         msg.text("Pushing repository to the hub...")
@@ -135,7 +138,7 @@ def push(
         )
         url, _ = url.split("/tree/")
         msg.good(f"Pushed repository '{repo_name}' to the hub")
-        whl_url = f"{url}/resolve/main/{repo_name}-any-py3-none-any.whl"
+        whl_url = f"{url}/resolve/main/{repo_name}-{version}-py3-none-any.whl"
         if not silent:
             print(f"\nView your model here:\n{url}\n")
             print(f"Install your model:\npip install {whl_url}")
@@ -304,9 +307,7 @@ def _create_model_index(repo_name: str, data: Dict[str, Any]) -> List[Dict[str, 
             {
                 "task": {"name": "SENTS", "type": "token-classification"},
                 "metrics": [
-                    _create_metric(
-                        "Sentences F-Score", "f_score", data["sents_f"]
-                    ),
+                    _create_metric("Sentences F-Score", "f_score", data["sents_f"]),
                 ],
             }
         )
